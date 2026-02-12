@@ -18,4 +18,5 @@ fn main() {
     let seq = fetch(250000).unwrap();
     println!("A{:06}: {}", seq.number, seq.name);
     println!("First terms: {:?}", &seq.data[..15.min(seq.data.len())]);
+    println!("Keywords: {:?}", seq.keyword);
 }

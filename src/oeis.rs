@@ -1,4 +1,173 @@
 use serde::Deserialize;
+use std::fmt;
+use std::str::FromStr;
+
+/// An OEIS keyword tag.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Keyword {
+    /// Sequence is dependent on base used.
+    Base,
+    /// Sequence is too short to do any analysis with.
+    Bref,
+    /// Recently modified (assigned automatically).
+    Changed,
+    /// A continued fraction expansion of a number.
+    Cofr,
+    /// A decimal expansion of a number.
+    Cons,
+    /// An important sequence.
+    Core,
+    /// An erroneous or duplicated sequence.
+    Dead,
+    /// An unimportant sequence.
+    Dumb,
+    /// Duplicate of another sequence.
+    Dupe,
+    /// It is easy to produce terms of this sequence.
+    Easy,
+    /// A fixed sequence for some transformation.
+    Eigen,
+    /// A finite sequence.
+    Fini,
+    /// Numerators or denominators of a sequence of rationals.
+    Frac,
+    /// All terms of the sequence are given (implies `Fini`).
+    Full,
+    /// Next term is not known and may be hard to find.
+    Hard,
+    /// A sequence worth listening to.
+    Hear,
+    /// Less interesting; unlikely to be the intended match.
+    Less,
+    /// A sequence with an interesting graph.
+    Look,
+    /// More terms are needed.
+    More,
+    /// Multiplicative: a(mn) = a(m)*a(n) if gcd(m,n) = 1.
+    Mult,
+    /// Recently added (assigned automatically).
+    New,
+    /// An exceptionally nice sequence.
+    Nice,
+    /// All terms are nonnegative.
+    Nonn,
+    /// Obscure, better description needed.
+    Obsc,
+    /// Included on probation; may be deleted later.
+    Probation,
+    /// Sequence contains negative numbers.
+    Sign,
+    /// An irregular (or funny-shaped) triangle of numbers read by rows.
+    Tabf,
+    /// A regular triangle or square array read by rows or antidiagonals.
+    Tabl,
+    /// Not yet edited; requires editorial review.
+    Uned,
+    /// Little is known; an unsolved problem.
+    Unkn,
+    /// Counts walks or self-avoiding paths.
+    Walk,
+    /// Depends on words for the sequence in some language.
+    Word,
+}
+
+impl Keyword {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Keyword::Base => "base",
+            Keyword::Bref => "bref",
+            Keyword::Changed => "changed",
+            Keyword::Cofr => "cofr",
+            Keyword::Cons => "cons",
+            Keyword::Core => "core",
+            Keyword::Dead => "dead",
+            Keyword::Dumb => "dumb",
+            Keyword::Dupe => "dupe",
+            Keyword::Easy => "easy",
+            Keyword::Eigen => "eigen",
+            Keyword::Fini => "fini",
+            Keyword::Frac => "frac",
+            Keyword::Full => "full",
+            Keyword::Hard => "hard",
+            Keyword::Hear => "hear",
+            Keyword::Less => "less",
+            Keyword::Look => "look",
+            Keyword::More => "more",
+            Keyword::Mult => "mult",
+            Keyword::New => "new",
+            Keyword::Nice => "nice",
+            Keyword::Nonn => "nonn",
+            Keyword::Obsc => "obsc",
+            Keyword::Probation => "probation",
+            Keyword::Sign => "sign",
+            Keyword::Tabf => "tabf",
+            Keyword::Tabl => "tabl",
+            Keyword::Uned => "uned",
+            Keyword::Unkn => "unkn",
+            Keyword::Walk => "walk",
+            Keyword::Word => "word",
+        }
+    }
+}
+
+impl fmt::Display for Keyword {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ParseKeywordError(pub String);
+
+impl fmt::Display for ParseKeywordError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "unknown OEIS keyword: {:?}", self.0)
+    }
+}
+
+impl std::error::Error for ParseKeywordError {}
+
+impl FromStr for Keyword {
+    type Err = ParseKeywordError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "base" => Ok(Keyword::Base),
+            "bref" => Ok(Keyword::Bref),
+            "changed" => Ok(Keyword::Changed),
+            "cofr" => Ok(Keyword::Cofr),
+            "cons" => Ok(Keyword::Cons),
+            "core" => Ok(Keyword::Core),
+            "dead" => Ok(Keyword::Dead),
+            "dumb" => Ok(Keyword::Dumb),
+            "dupe" => Ok(Keyword::Dupe),
+            "easy" => Ok(Keyword::Easy),
+            "eigen" => Ok(Keyword::Eigen),
+            "fini" => Ok(Keyword::Fini),
+            "frac" => Ok(Keyword::Frac),
+            "full" => Ok(Keyword::Full),
+            "hard" => Ok(Keyword::Hard),
+            "hear" => Ok(Keyword::Hear),
+            "less" => Ok(Keyword::Less),
+            "look" => Ok(Keyword::Look),
+            "more" => Ok(Keyword::More),
+            "mult" => Ok(Keyword::Mult),
+            "new" => Ok(Keyword::New),
+            "nice" => Ok(Keyword::Nice),
+            "nonn" => Ok(Keyword::Nonn),
+            "obsc" => Ok(Keyword::Obsc),
+            "probation" => Ok(Keyword::Probation),
+            "sign" => Ok(Keyword::Sign),
+            "tabf" => Ok(Keyword::Tabf),
+            "tabl" => Ok(Keyword::Tabl),
+            "uned" => Ok(Keyword::Uned),
+            "unkn" => Ok(Keyword::Unkn),
+            "walk" => Ok(Keyword::Walk),
+            "word" => Ok(Keyword::Word),
+            other => Err(ParseKeywordError(other.to_owned())),
+        }
+    }
+}
 
 fn join_lines(v: Vec<String>) -> String {
     v.join("\n")
@@ -8,6 +177,13 @@ fn parse_data(s: &str) -> Vec<i64> {
     s.split(',')
         .filter(|s| !s.is_empty())
         .map(|s| s.parse().expect("invalid integer in OEIS data field"))
+        .collect()
+}
+
+fn parse_keywords(s: &str) -> Vec<Keyword> {
+    s.split(',')
+        .filter(|s| !s.is_empty())
+        .map(|s| s.parse().expect("unknown OEIS keyword"))
         .collect()
 }
 
@@ -40,8 +216,8 @@ pub struct OeisSequence {
     pub program: String,
     /// Cross-references to related sequences.
     pub xref: String,
-    /// Comma-separated keyword tags (e.g. "nonn,core,nice,hard").
-    pub keyword: String,
+    /// Keyword tags (e.g. [Nonn, Core, Nice, Hard]).
+    pub keyword: Vec<Keyword>,
     /// Offset information (e.g. "0,5").
     pub offset: String,
     /// Author attribution.
@@ -74,7 +250,7 @@ impl From<OeisEntry> for OeisSequence {
             mathematica: join_lines(e.mathematica),
             program: join_lines(e.program),
             xref: join_lines(e.xref),
-            keyword: e.keyword,
+            keyword: parse_keywords(&e.keyword),
             offset: e.offset,
             author: e.author,
             ext: join_lines(e.ext),
