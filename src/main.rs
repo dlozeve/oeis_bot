@@ -45,7 +45,11 @@ fn fetch_random() -> OeisSequence {
 
 fn main() {
     let seq = fetch_random();
-    println!("A{:06}: {}", seq.number, seq.name);
-    println!("First terms: {:?}", &seq.data[..15.min(seq.data.len())]);
-    println!("Keywords: {:?}", seq.keyword);
+    println!("OEIS sequence A{:06}", seq.number);
+    println!("{}", seq.name);
+    let data: Vec<String> = seq.data.iter().map(|n| n.to_string()).collect();
+    println!("{}", data.join(", "));
+    let keywords: Vec<String> = seq.keyword.iter().map(|kw| kw.to_string()).collect();
+    println!("{}", keywords.join(", "));
+    println!("https://oeis.org/A{}", seq.number);
 }
