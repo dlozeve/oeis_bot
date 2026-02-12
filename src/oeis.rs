@@ -1,3 +1,4 @@
+use num_bigint::BigInt;
 use serde::Deserialize;
 use std::fmt;
 use std::str::FromStr;
@@ -173,7 +174,7 @@ fn join_lines(v: Vec<String>) -> String {
     v.join("\n")
 }
 
-fn parse_data(s: &str) -> Vec<i64> {
+fn parse_data(s: &str) -> Vec<BigInt> {
     s.split(',')
         .filter(|s| !s.is_empty())
         .map(|s| s.parse().expect("invalid integer in OEIS data field"))
@@ -195,7 +196,7 @@ pub struct OeisSequence {
     /// Old-style handbook ID (e.g. "M0692 N0256").
     pub id: Option<String>,
     /// The sequence values.
-    pub data: Vec<i64>,
+    pub data: Vec<BigInt>,
     /// Human-readable name/description.
     pub name: String,
     /// Commentary and observations.
