@@ -190,6 +190,7 @@ fn parse_keywords(s: &str) -> Vec<Keyword> {
 
 /// An OEIS sequence in a form convenient for manipulation.
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct OeisSequence {
     /// The A-number (e.g. 250000 for A250000).
     pub number: u64,
