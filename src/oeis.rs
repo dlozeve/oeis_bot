@@ -326,6 +326,7 @@ pub struct OeisEntry {
     pub offset: String,
 
     /// Author attribution.
+    #[serde(default)]
     pub author: String,
 
     /// Extension and edit history entries.
