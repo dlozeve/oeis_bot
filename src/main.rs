@@ -1,60 +1,20 @@
 mod error;
+mod fetch;
+mod mastodon;
 mod oeis;
 
-use error::FetchError;
-use oeis::{Keyword, OeisEntry, OeisSequence};
-use rand::Rng;
-
-const MAX_SEQUENCE_ID: u64 = 380_000;
-
-const REJECTED_KEYWORDS: &[Keyword] = &[
-    Keyword::Dead,
-    Keyword::Dumb,
-    Keyword::Dupe,
-    Keyword::Less,
-    Keyword::Obsc,
-    Keyword::Probation,
-    Keyword::Uned,
-];
-
-/// Fetch a sequence from oeis.org by its A-number (e.g. `fetch(250000)`
-/// retrieves A250000).
-pub fn fetch(id: u64) -> Result<OeisSequence, FetchError> {
-    let entries: Vec<OeisEntry> = ureq::get("https://oeis.org/search")
-        .query("q", format!("id:A{id:06}"))
-        .query("fmt", "json")
-        .call()?
-        .body_mut()
-        .read_json()?;
-    let entry = entries.into_iter().next().ok_or(FetchError::NotFound(id))?;
-    Ok(OeisSequence::from(entry))
-}
-
-/// Fetch a random sequence from the OEIS, excluding sequences with
-/// one of the rejected keywords.
-fn fetch_random() -> OeisSequence {
-    let mut rng = rand::rng();
-    loop {
-        let id = rng.random_range(1..=MAX_SEQUENCE_ID);
-        let seq = match fetch(id) {
-            Ok(seq) => seq,
-            Err(FetchError::NotFound(_)) => continue,
-            Err(e) => panic!("{e}"),
-        };
-        if seq.keyword.iter().any(|kw| REJECTED_KEYWORDS.contains(kw)) {
-            continue;
-        }
-        return seq;
-    }
-}
+use std::env;
 
 fn main() {
-    let seq = fetch_random();
-    println!("OEIS sequence A{:06}", seq.number);
-    println!("{}", seq.name);
-    let data: Vec<String> = seq.data.iter().map(|n| n.to_string()).collect();
-    println!("{}", data.join(", "));
-    let keywords: Vec<String> = seq.keyword.iter().map(|kw| kw.to_string()).collect();
-    println!("{}", keywords.join(", "));
-    println!("https://oeis.org/A{}", seq.number);
+    let seq = fetch::fetch_random();
+    let status = mastodon::format_status(&seq);
+    println!("{status}");
+
+    let instance_url = env::var("MASTODON_INSTANCE_URL")
+        .expect("MASTODON_INSTANCE_URL environment variable must be set");
+    let token = env::var("MASTODON_ACCESS_TOKEN")
+        .expect("MASTODON_ACCESS_TOKEN environment variable must be set");
+
+    mastodon::post_status(&instance_url, &token, &status)
+        .expect("failed to post status to Mastodon");
 }
