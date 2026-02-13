@@ -1,0 +1,8 @@
+[Unit]
+Description=Post a random OEIS sequence to Mastodon
+
+[Service]
+Type=oneshot
+ExecStart=%/.local/bin/oeis_bot
+Environment=MASTODON_INSTANCE_URL=https://mathstodon.xyz
+Environment=MASTODON_ACCESS_TOKEN=your-access-token-here

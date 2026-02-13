@@ -8,7 +8,6 @@ use std::env;
 fn main() {
     let seq = fetch::fetch_random();
     let status = mastodon::format_status(&seq);
-    println!("{status}");
 
     let instance_url = env::var("MASTODON_INSTANCE_URL")
         .expect("MASTODON_INSTANCE_URL environment variable must be set");

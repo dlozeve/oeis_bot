@@ -1,0 +1,9 @@
+[Unit]
+Description=Post a random OEIS sequence to Mastodon every 4 hours
+
+[Timer]
+OnCalendar=*-*-* 00/4:00:00
+Persistent=false
+
+[Install]
+WantedBy=timers.target
