@@ -1,5 +1,7 @@
 # OEIS bot
 
+➡️ [@OEISbot@mathstodon.xyz](https://mathstodon.xyz/@OEISbot) ⬅️
+
 Fetch a random sequence from the [OEIS](https://oeis.org/), and post
 it to Mastodon.
 
